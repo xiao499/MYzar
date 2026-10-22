@@ -2,6 +2,7 @@
 #include "stm32f1xx_hal.h"
 #include "core_cm3.h"
 #include "PID.h"
+#include "app_control.h"
 uint8_t button_state = 1;
 uint8_t volatile button_flag = 0;
 uint32_t button_time = 0;
@@ -43,6 +44,10 @@ void app_button_process(void)
             button_flag = 0;
             button_state = !button_state;
             APP_Motor_Cmd();
+			/* 修复(19)：原来写的是 void app_rest(void); —— 这是函数声明，
+			   等于空语句，app_rest 从来没被真正调用过，速度环积分开机不清零。
+			   改成真正的调用。 */
+			app_rest();
             
         }
         else
@@ -111,25 +116,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         t0_l = GetMicros();
         uint32_t B_level = GPIOB->IDR & GPIO_PIN_15;
         uint32_t A_level = GPIOB->IDR & GPIO_PIN_14;
-        /* 修复：左电机两根线已对调（duty>0 现在朝前），所以这里也必须整块对调，
-           让"朝前"报成正。两处必须成对改：只换电机线不改这里，duty>0 → 轮子朝前
-           → 编码器报负 → 变成正反馈，输出顶满、转速恒定不跟目标。
-           注意不能靠对调编码器 A/B 线来翻符号：A 相在 PB14，EXTI 只配在 PB14，
-           换线后脉冲全落到 PB15 上，一个中断都不进，左轮会永远读成 0。 */
+        /* 修复(14)：按键后左轮一直往前冲、右轮正常 → 左轮速度环是正反馈，
+           说明左编码器判向和电机极性反了。电机极性在修复(11)里已用软件补偿，
+           这里把左轮判向整块对调，恢复"duty>0 → 轮子朝前 → 编码器报正"。
+           左右两轮这个约定必须一致，否则平衡环命令两轮同转时一轮反着转。 */
         if(A_level && B_level==0 || A_level==0 && B_level)
         {
-                encoder_l++;
-                if(direction_l < 0)
-                {
-                    direction_l = 2;
-                }
-                else
-                {
-                    direction_l = 1; 
-                }
-        }
-        else
-        {        
                 encoder_l--;
                 if(direction_l > 0)
                 {
@@ -138,6 +130,18 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
                 else
                 {
                     direction_l = -1;
+                }
+        }
+        else
+        {        
+                encoder_l++;
+                if(direction_l < 0)
+                {
+                    direction_l = 2;
+                }
+                else
+                {
+                    direction_l = 1; 
                 }
         }
     }

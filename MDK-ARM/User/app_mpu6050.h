@@ -16,4 +16,5 @@ void App_MPU6050_Proc(void);
 float App_MPU6050_GetYaw(void);
 float App_MPU6050_GetPitch(void);
 float App_MPU6050_GetRoll(void);
+float fast_atan2_deg(float y, float x);
 #endif

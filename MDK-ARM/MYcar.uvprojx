@@ -334,9 +334,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>USE_HAL_DRIVER,STM32F103xB</Define>
+              <Define>USE_HAL_DRIVER,STM32F103xB,ARM_MATH_CM3</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;./User;./test</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../Drivers/CMSIS/DSP/Include;./User;./test</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -605,6 +605,11 @@
               <FileType>1</FileType>
               <FilePath>../Core/Src/system_stm32f1xx.c</FilePath>
             </File>
+            <File>
+              <FileName>arm_cortexM3l_math.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>../Drivers/CMSIS/Lib/ARM/arm_cortexM3l_math.lib</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -679,6 +684,16 @@
               <FileName>PID.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\User\PID.h</FilePath>
+            </File>
+            <File>
+              <FileName>app_control.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\app_control.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_control.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\User\app_control.h</FilePath>
             </File>
           </Files>
         </Group>

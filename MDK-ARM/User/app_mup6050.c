@@ -96,7 +96,7 @@ float App_MPU6050_GetRoll(void)
 // 快速atan2，直接返回角度制，误差约±0.2°，比库函数atan2快约10倍
 // 原理：|y|<=|x|时用多项式 atan(z) ≈ 45z + 15.64z(1-|z|) 近似（z=y/x）
 //       |y|>|x|时先算atan(x/y)，再按象限折算成 90°-角度
-static float fast_atan2_deg(float y, float x)
+float fast_atan2_deg(float y, float x)
 {
     float deg, r;
     if (fabsf(x) >= fabsf(y)) {
@@ -117,8 +117,14 @@ void App_MPU6050_Proc(void)
     if(HAL_GetTick() < nxt)return;
     App_Mpu6050_Update();
     float yaw_g = yaw + gz * 0.005;
-    float pitch_g = pitch + gy * 0.005;
-    float roll_g = roll - gx * 0.005;
+    /* 修复(18)：串口实测确认安装轴和符号——车往前倾时 gx 从 0 升到 +15°/s，
+       gy 基本不动。所以俯仰角速度在 gx 轴上且符号为正，pitch 用 +gx 积分。
+       加速度分量在 ay 上（前倾时 ay = +g·sinθ），atan2(ay,az) = +θ，
+       和 +gx 积分的符号一致。
+       修复16 的 -gx 符号反了，会和加速度项互相打架；
+       修复17 的 +gy 是横滚轴，俯仰时恒为 0。 */
+    float pitch_g = pitch + gx * 0.005;
+    float roll_g = roll - gy * 0.005;
     
     // 用raw原始值算角度：三轴缩放系数相同，比值不变，结果和用ax/ay/az一致
     // int16_t转float是精确的（16位有效值 < float的24位尾数），不损失精度

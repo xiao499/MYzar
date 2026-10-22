@@ -4,6 +4,7 @@
 extern ADC_HandleTypeDef hadc1;
 static uint32_t lasttime = 0;
 static uint32_t stage = 0;
+
 extern TIM_HandleTypeDef htim2;
 void  app_Bat_Init(void)
 {

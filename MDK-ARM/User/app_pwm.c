@@ -24,15 +24,18 @@ void PWM_SetDuty_L(float duty)
         sign = -1;
         duty_abs = -duty;
     }
+    /* 修复(11)：左右轮方向相反（同一命令下左轮往后、右轮往前），
+       说明左电机极性现在是反的。软件里对调左轮方向脚，
+       等效于对调电机两根线；编码器判向不动，速度环仍是负反馈。 */
     if (sign == 1)
-    {
-        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
-        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_RESET);
-    }
-    else
     {
         HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
         HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_SET);
+    }
+    else
+    {
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_RESET);
     }
     uint16_t duty_ticks = duty_abs/100.0f*999;
     __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, duty_ticks);

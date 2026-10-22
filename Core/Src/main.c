@@ -33,6 +33,7 @@
 #include "string.h"
 #include "stdio.h"
 #include "app_encoder.h"
+#include "app_control.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -65,7 +66,7 @@ UART_HandleTypeDef huart3;
 /* USER CODE BEGIN PV */
 static uint32_t last_time;
 static uint32_t state;
-static float targetOmega;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -80,7 +81,7 @@ static void MX_TIM4_Init(void);
 static void MX_I2C1_Init(void);
 /* USER CODE BEGIN PFP */
 static void OnbordLED_Proc(void);
-static void USart2_proc(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -102,18 +103,7 @@ static void OnbordLED_Proc(void)
     }
   }
 }
-static void USart2_proc(void)
-{
-  static uint32_t nxt = 0;
-  if(HAL_GetTick() < nxt)return;
-  float omega_l = App_Encoder_GetSpeed_L();
-  float omega_r = App_Encoder_GetSpeed_R();
-  
-  char buf[100];
-  sprintf(buf,"%f,%f,%f\r\n",targetOmega, omega_l, omega_r); 
-  HAL_UART_Transmit(&huart2, (uint8_t*)buf, strlen(buf), 100);
-  nxt += 10;
-}
+
 /* USER CODE END 0 */
 
 /**
@@ -156,6 +146,9 @@ int main(void)
   app_Bat_Init();
   App_Mpu6050_Init();
   App_Motor_init();
+  /* 修复(12)：App_Control_Init 之前没被调用，角度环/角速度环的 Kp、Ki、Kd
+     全是 0，平衡算法等于没开，只剩重力前馈，车必然稳不住 */
+  App_Control_Init();
   //MPU_6050_EuarAngle_test();
   //App_Mpu6050_test();
   //Encoder_T_method_test();
@@ -168,13 +161,13 @@ int main(void)
   while (1)
   {
     /* 台阶最大 12 rad/s：已经贴近 8.4V 下满占空比的空载顶速，最后一级可能跟不满 */
-    targetOmega = (HAL_GetTick()/1000)%7*2.0f;
-    App_Motor_SetOmega_L(targetOmega);
-    App_Motor_SetOmega_R(targetOmega);
+
+
     app_button_process();
     App_bat_process();
     App_Motor_Proc();
-    USart2_proc();
+    App_MPU6050_Proc();
+    App_Control_Proc();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

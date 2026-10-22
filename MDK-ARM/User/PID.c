@@ -1,11 +1,13 @@
 #include "PID.h"
 #include "app_encoder.h"
 #include "app_pwm.h"
+#include "app_control.h"
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim4;
 static PID_TypeDef PID_L;
 static PID_TypeDef PID_R;
 extern uint32_t GetMicros(void);
+
 void PID_Init(PID_TypeDef *PID, float Kp, float Ki, float Kd)
 {
     PID->Kp = Kp;
@@ -72,8 +74,10 @@ void App_Motor_Proc(void)
     float ua_l = PID_Compute(&PID_L, omega_l);
     float ua_r = PID_Compute(&PID_R, omega_r);
 
-    float duty_l = ua_l / 7.9 * 100.0f;
-    float duty_r = ua_r / 7.9 * 100.0f;
+
+
+    float duty_l = ua_l / 8.0* 100.0f;
+    float duty_r = ua_r / 8.0 * 100.0f;
 
     PWM_SetDuty_L(duty_l);
     PWM_SetDuty_R(duty_r);
@@ -106,6 +110,7 @@ void APP_Motor_Cmd(void)
 {
 	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+    App_Control_Zero();   /* 修复(13)：每次按键启动都清零平衡状态、重标定直立角 */
     PID_reset(&PID_L);
     PID_reset(&PID_R);
 }
