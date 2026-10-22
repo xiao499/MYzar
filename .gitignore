@@ -1,0 +1,13 @@
+# Keil 编译输出（不提交）
+MDK-ARM/MYcar/
+MDK-ARM/Objects/
+MDK-ARM/Listings/
+MDK-ARM/DebugConfig/
+*.dep
+*.uvguix.*
+*.lst
+
+# 其他
+.vscode/
+EventRecorderInitFile.*
+JLinkSettings.ini
