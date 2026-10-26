@@ -34,6 +34,7 @@
 #include "stdio.h"
 #include "app_encoder.h"
 #include "app_control.h"
+#include "app_remote_control.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -149,6 +150,7 @@ int main(void)
   /* 修复(12)：App_Control_Init 之前没被调用，角度环/角速度环的 Kp、Ki、Kd
      全是 0，平衡算法等于没开，只剩重力前馈，车必然稳不住 */
   App_Control_Init();
+  app_remote_control_Init();
   //MPU_6050_EuarAngle_test();
   //App_Mpu6050_test();
   //Encoder_T_method_test();
@@ -168,6 +170,7 @@ int main(void)
     App_Motor_Proc();
     App_MPU6050_Proc();
     App_Control_Proc();
+    app_remote_control_Proc();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -520,7 +523,7 @@ static void MX_USART3_UART_Init(void)
 
   /* USER CODE END USART3_Init 1 */
   huart3.Instance = USART3;
-  huart3.Init.BaudRate = 921600;
+  huart3.Init.BaudRate = 9600;
   huart3.Init.WordLength = UART_WORDLENGTH_8B;
   huart3.Init.StopBits = UART_STOPBITS_1;
   huart3.Init.Parity = UART_PARITY_NONE;

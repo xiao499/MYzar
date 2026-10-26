@@ -8,6 +8,7 @@ static PID_TypeDef PID_veiocity;
 extern uint32_t GetMicros(void); 
 static PID_TypeDef PID_theta;
 static PID_TypeDef PID_theta_dot;
+static PID_TypeDef PID_turn;
 static const float g = 9.8f;
 static const float lp = 0.062;
 static const float rw = 0.032;
@@ -25,6 +26,8 @@ void App_Control_Init(void)
     PID_LimitConfig(&PID_theta, 12.57f, -12.57f);
     PID_Init(&PID_theta_dot, 10.0f, 10.0f, 0.0f);
     PID_LimitConfig(&PID_theta_dot, 125.7f, -125.7f);
+    PID_Init(&PID_turn, 1.0f, 0.0f, 0.0f);
+    PID_LimitConfig(&PID_turn, 15.0f, -15.0f);
 }
 
 /* 修复(13)：按键启动时清零平衡状态并标定直立角。
@@ -57,7 +60,7 @@ void App_Control_Proc(void)
     {
         delta_t = 0.001f;
     }
-	PID_change_SP(&PID_veiocity, 0.0f);
+	//PID_change_SP(&PID_veiocity, 0.0f);
 	float omega = 0.5*(App_Encoder_GetSpeed_L()+App_Encoder_GetSpeed_R());
 	float theta = (App_MPU6050_GetPitch() - theta_offset)*0.0174533f;
 	float theta_dot = (App_Mpu6050_GetGx() - gx_offset)*0.0174533f;
@@ -100,13 +103,14 @@ void App_Control_Proc(void)
 	{
 		omega_ref += 1.0f/ rw * x_dot_dot_ref*delta_t;
 	}
-    
+    float gz = App_Mpu6050_GetGz()*0.017453f;
+    float omega_diff =PID_Compute(&PID_turn,  gz);
     /* 轮子空载顶速约 12 rad/s，指令超出 ±20 rad/s 没有意义，夹住防止累积。 */
     if (omega_ref >  20.0f) omega_ref =  20.0f;
     if (omega_ref < -20.0f) omega_ref = -20.0f;
 
-    App_Motor_SetOmega_L(omega_ref);
-    App_Motor_SetOmega_R(omega_ref);
+    App_Motor_SetOmega_L(omega_ref+omega_diff);
+    App_Motor_SetOmega_R(omega_ref-omega_diff);
 
 
 
@@ -120,4 +124,16 @@ void app_rest(void)
 	PID_reset(&PID_veiocity);
 	PID_reset(&PID_theta);
 	PID_reset(&PID_theta_dot);
+}
+
+
+
+void app_remote_control_setmoveSpeed(float MoveSpeed)
+{
+    PID_change_SP(&PID_veiocity, MoveSpeed);
+}
+void app_remote_control_setturnSpeed(float TurnSpeed)
+{
+    PID_change_SP(&PID_turn, TurnSpeed);
+
 }

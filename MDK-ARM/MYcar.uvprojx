@@ -601,14 +601,14 @@
           <GroupName>Drivers/CMSIS</GroupName>
           <Files>
             <File>
-              <FileName>system_stm32f1xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Core/Src/system_stm32f1xx.c</FilePath>
-            </File>
-            <File>
               <FileName>arm_cortexM3l_math.lib</FileName>
               <FileType>4</FileType>
               <FilePath>../Drivers/CMSIS/Lib/ARM/arm_cortexM3l_math.lib</FilePath>
+            </File>
+            <File>
+              <FileName>system_stm32f1xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Core/Src/system_stm32f1xx.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -694,6 +694,16 @@
               <FileName>app_control.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\User\app_control.h</FilePath>
+            </File>
+            <File>
+              <FileName>app_remote_control.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\app_remote_control.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_remote_control.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\User\app_remote_control.h</FilePath>
             </File>
           </Files>
         </Group>
